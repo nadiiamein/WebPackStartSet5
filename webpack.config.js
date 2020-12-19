@@ -1,7 +1,8 @@
 const path = require('path');
+const HTMLWebpackPlugin = require('html-webpack-plugin');
 
 const isDev = process.env.NODE_ENV === 'development';
-const isPod = !isDev;
+const isProd = !isDev;
 
 const filename = (ext) => isDev ? `[name].${ext}` : `[name].[contenthash].${ext}`;
 
@@ -12,5 +13,14 @@ module.exports = {
   output: {
       filename: `./js/${filename('js')}`,
       path:path.resolve(__dirname, 'app'),
-  }
+  },
+  plugins: [
+      new HTMLWebpackPlugin({
+        template: path.resolve(__dirname, './src/index.html'), 
+        filename: 'index.html',
+        minify: {
+            collapseWhiespace: isProd,
+        }
+      })
+  ]
 };
