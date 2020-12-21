@@ -43,12 +43,22 @@ module.exports = {
       rules:[
           {
               test: /\.css$/i,
-              use: [MiniCssExtractPlugin.loader, 'css-loader'],
+              use:
+               [
+                 {
+                  loader: MiniCssExtractPlugin.loader,
+                   options: {
+                     hmr: isDev
+                   },
+                 },
+                 'css-loader'
+
+                  ],
           },
           {
             test: /\.s[ac]ss$/i,
             use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
-        },
-      ],
+        }
+      ]
   },
 };
