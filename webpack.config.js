@@ -69,7 +69,18 @@ module.exports = {
           },
           {
             test: /\.s[ac]ss$/i,
-            use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+            use: [
+              {
+                loader: MiniCssExtractPlugin.loader,
+                options: {
+                  publicPath: (resourcePath, context) => {
+                    return path.relative(path.dirname(resourcePath), context) + '/';
+                  },
+                },
+              },
+               'css-loader',
+                'sass-loader'
+            ],
         },
         {
           test: /\.(?:|gif|png|jpg|jpeg|svg)$/,
@@ -80,7 +91,18 @@ module.exports = {
             }
           
           }],
-      }
+      },
+      {
+        test: /\.(?:|woff2)$/,
+        use: [{
+          loader: 'file-loader',
+          options: {
+            name: `./fonts/${filename('[ext]')}`
+          }
+        
+        }],
+    },
+
       ]
   },
 };
