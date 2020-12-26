@@ -1,13 +1,63 @@
 const path = require('path');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
-const MiniCssExtractPlugin =require('mini-css-extract-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const OptimizeCssAssetWebpackPlugin = require('optimize-css-assets-webpack-plugin');
+const TerserWebpackPlugin = require('terser-webpack-plugin');
+//const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
+
+const { config } = require('webpack');
 
 const isDev = process.env.NODE_ENV === 'development';
 const isProd = !isDev;
 
 const filename = (ext) => isDev ? `[name].${ext}` : `[name].[contenthash].${ext}`;
+
+const optimization = () => {
+const configObj = {
+splitChunks: {
+  chunks: 'all'
+}
+};
+if (isProd) {
+  configObj.minimizer = [
+    new OptimizeCssAssetWebpackPlugin(),
+    new TerserWebpackPlugin(),
+  ];
+}
+return configObj;
+};
+
+// const plugins = () => {
+//   const basePlugins = 
+//   if (isProd) {
+//   basePlugins.push(
+//     new ImageMinimizerPlugin({
+//       minimizerOptions: {
+       
+//         plugins: [
+//           ['gifsicle', { interlaced: true }],
+//           ['jpegtran', { progressive: true }],
+//           ['optipng', { optimizationLevel: 5 }],
+//           [
+//             'svgo',
+//             {
+//               plugins: [
+//                 {
+//                   removeViewBox: false,
+//                 },
+//               ],
+//             },
+//           ],
+//         ],
+//       },
+//     })
+//   );  
+  
+//   }
+//   return basePlugins;
+// };
 
 module.exports = {
     context: path.resolve(__dirname, 'src'),
@@ -25,28 +75,30 @@ module.exports = {
     compress: true,
     hot: true,
     port: 3000,
-
   },
+  optimization: optimization(),
   plugins: [
-      new HTMLWebpackPlugin({
-        template: path.resolve(__dirname, './src/index.html'), 
-        filename: 'index.html',
-        minify: {
-            collapseWhitespace: isProd,
-        }
-      }),
-      new CleanWebpackPlugin(),
-      new MiniCssExtractPlugin({
-        filename: `./css/${filename('css')}`,
 
-      }),
-      new CopyWebpackPlugin({
-        patterns: [
-          {
-            from: path.resolve(__dirname, 'src/assets'), to: path.resolve(__dirname, 'app') }
-        ]
-      })
-  ],
+   new HTMLWebpackPlugin({
+          template: path.resolve(__dirname, './src/index.html'), 
+          filename: 'index.html',
+          minify: {
+              collapseWhitespace: isProd,
+          }
+        }),
+        new CleanWebpackPlugin(),
+        new MiniCssExtractPlugin({
+          filename: `./css/${filename('css')}`,
+    
+        }),
+        new CopyWebpackPlugin({
+          patterns: [
+            {
+              from: path.resolve(__dirname, 'src/assets'), to: path.resolve(__dirname, 'app') }
+          ]
+        }),
+      ],
+  devtool: isProd ? false : 'source-map',
   module:{
       rules:[
         {
@@ -83,24 +135,27 @@ module.exports = {
             ],
         },
         {
+          test: /\.js$/,
+          exclude: /node_modeles/,
+          use: ['babel-loader'],
+      },
+        {
           test: /\.(?:|gif|png|jpg|jpeg|svg)$/,
           use: [{
             loader: 'file-loader',
             options: {
               name: `./img/${filename('[ext]')}`
-            }
+            },
           
           }],
       },
-      {
-        test: /\.(?:|woff2)$/,
-        use: [{
-          loader: 'file-loader',
-          options: {
-            name: `./fonts/${filename('[ext]')}`
-          }
-        
-        }],
+     
+    {
+      loader: 'file-loader',
+      options: {
+        name: '[path][name].[ext]',
+      },
+      test: /\.(jpe?g|png|gif|svg)$/i,
     },
 
       ]
